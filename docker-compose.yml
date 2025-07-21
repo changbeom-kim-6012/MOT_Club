@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 데이터베이스
+  postgres:
+    image: postgres:15
+    container_name: mot_postgres
+    environment:
+      POSTGRES_DB: mot_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Chang1328!@
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./Backend/mot/src/main/resources/db-migration.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - mot_network
+
+  # Redis (세션 저장용)
+  redis:
+    image: redis:7-alpine
+    container_name: mot_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - mot_network
+
+  # Spring Boot 백엔드
+  backend:
+    build:
+      context: ./Backend/mot
+      dockerfile: Dockerfile
+    container_name: mot_backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mot_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Chang1328!@
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./Backend/mot/uploads:/app/uploads
+    networks:
+      - mot_network
+
+  # Next.js 프론트엔드
+  frontend:
+    build:
+      context: ./Frontend/mot
+      dockerfile: Dockerfile
+    container_name: mot_frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - mot_network
+
+volumes:
+  postgres_data:
+
+networks:
+  mot_network:
+    driver: bridge 
