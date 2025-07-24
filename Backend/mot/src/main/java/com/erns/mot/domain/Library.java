@@ -32,6 +32,9 @@ public class Library {
     
     @Column(columnDefinition = "TEXT")
     private String filePaths; // 다중 파일 경로를 쉼표로 구분하여 저장
+    
+    @Column(columnDefinition = "TEXT")
+    private String fileTypes; // 다중 파일 타입을 쉼표로 구분하여 저장 (view-only, downloadable)
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -60,6 +63,8 @@ public class Library {
     public void setFileNames(String fileNames) { this.fileNames = fileNames; }
     public String getFilePaths() { return filePaths; }
     public void setFilePaths(String filePaths) { this.filePaths = filePaths; }
+    public String getFileTypes() { return fileTypes; }
+    public void setFileTypes(String fileTypes) { this.fileTypes = fileTypes; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

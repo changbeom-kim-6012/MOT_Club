@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/course-materials")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:13000"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://localhost:13000"})
 public class CourseMaterialController {
 
     private final CourseMaterialService courseMaterialService;
@@ -74,6 +74,36 @@ public class CourseMaterialController {
         }
     }
 
+    @GetMapping("/view/{id}")
+    public ResponseEntity<Resource> viewFile(@PathVariable Long id) {
+        try {
+            CourseMaterial material = courseMaterialService.getMaterialById(id);
+            if (material == null || material.getFilePath() == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Path filePath = Paths.get(material.getFilePath());
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (resource.exists() && resource.isReadable()) {
+                // 파일 확장자에 따른 Content-Type 설정
+                String contentType = determineContentType(material.getFileName());
+                
+                return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename*=UTF-8''" + java.net.URLEncoder.encode(material.getFileName(), "UTF-8"))
+                    .header("X-Content-Type-Options", "nosniff")
+                    .header("Cache-Control", "no-cache")
+                    .header("X-Frame-Options", "SAMEORIGIN")
+                    .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @GetMapping("/download/{id}")
     public ResponseEntity<Resource> downloadFile(@PathVariable Long id) {
         try {
@@ -95,6 +125,31 @@ public class CourseMaterialController {
             }
         } catch (MalformedURLException e) {
             return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    private String determineContentType(String fileName) {
+        if (fileName == null) return "application/octet-stream";
+        
+        String extension = fileName.toLowerCase();
+        if (extension.endsWith(".pdf")) {
+            return "application/pdf";
+        } else if (extension.endsWith(".jpg") || extension.endsWith(".jpeg")) {
+            return "image/jpeg";
+        } else if (extension.endsWith(".png")) {
+            return "image/png";
+        } else if (extension.endsWith(".gif")) {
+            return "image/gif";
+        } else if (extension.endsWith(".txt")) {
+            return "text/plain";
+        } else if (extension.endsWith(".doc") || extension.endsWith(".docx")) {
+            return "application/msword";
+        } else if (extension.endsWith(".xls") || extension.endsWith(".xlsx")) {
+            return "application/vnd.ms-excel";
+        } else if (extension.endsWith(".ppt") || extension.endsWith(".pptx")) {
+            return "application/vnd.ms-powerpoint";
+        } else {
+            return "application/octet-stream";
         }
     }
 } 

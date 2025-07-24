@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:13000"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://localhost:13000"})
 public class UserController {
 
     private final UserService userService;
@@ -36,14 +36,19 @@ public class UserController {
         String email = request.get("email");
         String password = request.get("password");
 
+        System.out.println("로그인 요청 받음 - 이메일: " + email);
+
         if (email == null || password == null) {
+            System.out.println("로그인 실패: 이메일 또는 비밀번호가 null");
             return ResponseEntity.badRequest().body(Map.of("message", "이메일과 비밀번호를 입력해주세요."));
         }
 
         try {
             User user = userService.login(email, password);
+            System.out.println("로그인 성공: " + user.getName() + " (" + user.getEmail() + ")");
             return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
+            System.out.println("로그인 실패: " + e.getMessage());
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }

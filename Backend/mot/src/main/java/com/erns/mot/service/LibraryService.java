@@ -32,25 +32,57 @@ public class LibraryService {
         }
     }
 
-    public Library createLibrary(Library library, MultipartFile[] files) throws IOException {
+    public Library createLibrary(Library library, MultipartFile[] files, String[] fileTypes) throws IOException {
+        System.out.println("=== 파일 업로드 디버깅 ===");
+        System.out.println("업로드된 파일 개수: " + files.length);
+        
         StringBuilder fileNames = new StringBuilder();
         StringBuilder filePaths = new StringBuilder();
+        StringBuilder fileTypesStr = new StringBuilder();
+        
         for (int i = 0; i < files.length; i++) {
             MultipartFile file = files[i];
+            System.out.println("파일 " + (i+1) + ": " + file.getOriginalFilename());
+            System.out.println("파일 크기: " + file.getSize() + " bytes");
+            
             String fileName = file.getOriginalFilename();
             String storedFileName = UUID.randomUUID().toString() + "_" + fileName;
             Path targetLocation = this.fileStorageLocation.resolve(storedFileName);
+            
+            System.out.println("저장 경로: " + targetLocation.toString());
+            
             Files.copy(file.getInputStream(), targetLocation);
+            System.out.println("파일 저장 완료: " + storedFileName);
+            
             fileNames.append(fileName);
-            filePaths.append(targetLocation.toString());
+            // 전체 경로 대신 파일명만 저장
+            filePaths.append(storedFileName);
+            
+            // 파일 타입 처리 (기본값: downloadable)
+            String fileType = (fileTypes != null && i < fileTypes.length) ? fileTypes[i] : "downloadable";
+            fileTypesStr.append(fileType);
+            
             if (i < files.length - 1) {
                 fileNames.append(",");
                 filePaths.append(",");
+                fileTypesStr.append(",");
             }
         }
+        
+        System.out.println("최종 fileNames: " + fileNames.toString());
+        System.out.println("최종 filePaths: " + filePaths.toString());
+        System.out.println("최종 fileTypes: " + fileTypesStr.toString());
+        System.out.println("=========================");
+        
         library.setFileNames(fileNames.toString());
         library.setFilePaths(filePaths.toString());
+        library.setFileTypes(fileTypesStr.toString());
         return libraryRepository.save(library);
+    }
+
+    // 기존 메서드와의 호환성을 위한 오버로드
+    public Library createLibrary(Library library, MultipartFile[] files) throws IOException {
+        return createLibrary(library, files, null);
     }
 
     public List<Library> getAllLibraryItems() {

@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/opinions")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:13000"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://localhost:13000"})
 public class OpinionController {
 
     private final OpinionService opinionService;
