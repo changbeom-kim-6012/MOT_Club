@@ -1,6 +1,7 @@
 package com.erns.mot.controller;
 
 import com.erns.mot.domain.Question;
+import com.erns.mot.dto.QuestionListDto;
 import com.erns.mot.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/questions")
@@ -25,9 +27,23 @@ public class QuestionController {
 
     // 모든 질문 목록 조회
     @GetMapping
-    public ResponseEntity<List<Question>> getAllQuestions() {
+    public ResponseEntity<List<QuestionListDto>> getAllQuestions() {
         List<Question> questions = questionService.getAllQuestions();
-        return ResponseEntity.ok(questions);
+        List<QuestionListDto> dtos = questions.stream()
+            .map(q -> new QuestionListDto(
+                q.getId(), 
+                q.getTitle(), 
+                q.getContent(), 
+                q.getAuthorEmail(), 
+                q.getCreatedAt(), 
+                q.getCategory1(), 
+                q.getViewCount(), 
+                q.getAnswerCount(), 
+                q.getStatus().toString(), 
+                q.isPublic()
+            ))
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     // 새 질문 생성 (Library 패턴과 동일)
@@ -37,10 +53,17 @@ public class QuestionController {
             @RequestParam("content") String content,
             @RequestParam("category1") String category1,
             @RequestParam("authorEmail") String authorEmail,
-            @RequestParam(value = "isPublic", defaultValue = "true") boolean isPublic,
+            @RequestParam(value = "isPublic", defaultValue = "true") String isPublicStr,
             @RequestParam(value = "contactInfo", required = false) String contactInfo,
             @RequestParam(value = "file", required = false) MultipartFile file) {
         try {
+            // 문자열을 boolean으로 변환
+            boolean isPublic = Boolean.parseBoolean(isPublicStr);
+            
+            // 디버깅을 위한 로그 추가
+            System.out.println("받은 isPublic 문자열: " + isPublicStr);
+            System.out.println("변환된 isPublic boolean: " + isPublic);
+            
             Question question = new Question();
             question.setTitle(title);
             question.setContent(content);
@@ -48,6 +71,9 @@ public class QuestionController {
             question.setAuthorEmail(authorEmail);
             question.setPublic(isPublic);
             question.setContactInfo(contactInfo);
+
+            // 설정된 값 확인
+            System.out.println("Question에 설정된 isPublic: " + question.isPublic());
 
             Question createdQuestion = questionService.createQuestion(question, file);
             return new ResponseEntity<>(createdQuestion, HttpStatus.CREATED);
@@ -71,10 +97,13 @@ public class QuestionController {
             @RequestParam("title") String title,
             @RequestParam("content") String content,
             @RequestParam("category1") String category1,
-            @RequestParam(value = "isPublic", defaultValue = "true") boolean isPublic,
+            @RequestParam(value = "isPublic", defaultValue = "true") String isPublicStr,
             @RequestParam(value = "contactInfo", required = false) String contactInfo,
             @RequestParam(value = "file", required = false) MultipartFile file) {
         try {
+            // 문자열을 boolean으로 변환
+            boolean isPublic = Boolean.parseBoolean(isPublicStr);
+            
             Question questionDetails = new Question();
             questionDetails.setTitle(title);
             questionDetails.setContent(content);
