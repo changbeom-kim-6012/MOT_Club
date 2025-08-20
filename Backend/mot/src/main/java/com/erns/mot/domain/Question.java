@@ -1,6 +1,5 @@
 package com.erns.mot.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -40,7 +39,6 @@ public class Question {
     private int viewCount = 0;
     private int answerCount = 0;
 
-    @JsonProperty("isPublic")
     private boolean isPublic = true;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)

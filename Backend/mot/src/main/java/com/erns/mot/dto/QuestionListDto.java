@@ -1,6 +1,5 @@
 package com.erns.mot.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
@@ -17,7 +16,6 @@ public class QuestionListDto {
     private int viewCount;
     private int answerCount;
     private String status;
-    @JsonProperty("isPublic")
     private boolean isPublic;
 
     public QuestionListDto(Long id, String title, String content, String authorEmail, LocalDateTime createdAt, String category1, int viewCount, int answerCount, String status, boolean isPublic) {
