@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://localhost:13000"})
+@CrossOrigin(origins = {"http://localhost:30001", "http://localhost:3001", "http://localhost:13000"})
 public class AnswerController {
 
     private final AnswerService answerService;
