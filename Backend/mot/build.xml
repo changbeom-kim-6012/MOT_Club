@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project>
+
+<project name="ReactUiMergeAntBuild" default="all" basedir=".">
+  <description>
+      React UI build Merge
+  </description>
+
+  <!-- 변수 선언 -->
+  <property name="projectName"      value="React UI build Merge"/>
+
+  <property name="ui_bo_path"       value="${boPath}"/>
+
+  <property name="srcPath"    location="src/main"/>
+  <property name="srcJava"    location="${srcPath}/java"/>
+  <property name="srcResources"  location="${srcPath}/resources"/>
+  <property name="srcWebapp"  location="${srcPath}/webapp"/>
+  <property name="srcWebInf"  location="${srcWebapp}/WEB-INF"/>
+
+  <target name="all" depends="init, mergeBo">
+    <echo message="Finished '${projectName}'"/>
+  </target>
+
+  <target name="init">
+    <echo message="Start... '${projectName}'"/>
+    <tstamp/>
+
+    <echo message="UI BackOffice Path : '${ui_bo_path}'"/>
+  </target>
+
+  <!-- BackOffice -->
+  <target name="cleanStatic" description="clean up for bo">
+    <delete dir="${srcResources}/static" includeEmptyDirs="true" verbose="false"/>
+    <mkdir dir="${srcResources}/static"/>
+  </target>
+
+  <target name="mergeBo" depends="cleanStatic" description="BackOffice UI Merge">
+    <copy todir="${srcResources}/static" verbose="false">
+      <fileset dir="${ui_bo_path}/dist"/>
+    </copy>
+
+    <!--<echo message="Make '${srcWebInf}/jsp/app/backOffice.jsp'"/>
+    <concat destfile="${srcWebInf}/jsp/app/backOffice.jsp" binary="yes">
+      <fileset file="${srcWebInf}/jsp/app/backOffice_template.jsp"/>
+      <fileset file="${srcResources}/static/index.html"/>
+    </concat>-->
+  </target>
+
+</project>
